@@ -2,6 +2,7 @@
 import ExcelJS from "exceljs";
 import path from "path";
 import { prisma } from "@/db";
+import fs from "fs";
 import {
   businessInfoFormSchema,
   personalInfoFormSchema,
@@ -465,5 +466,28 @@ export async function exportToExcel() {
       message: "Failed to download",
       fileUrl: null,
     };
+  }
+}
+export async function deleteFile(fileName: string) {
+  try {
+    if (!fileName) {
+      throw new Error("No file specified");
+    }
+
+    const filePath = path.join(
+      process.cwd(),
+      "public",
+      "applications",
+      fileName
+    );
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      return { success: true };
+    }
+    return { success: false, message: "File not found" };
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    return { success: false, message: "Internal server error" };
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { exportToExcel } from "@/lib/actions";
+import { deleteFile, exportToExcel } from "@/lib/actions";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +21,11 @@ export default function DownloadSheet() {
         });
       }
 
-      if (res.fileUrl) window.location.href = res.fileUrl;
+      if (res.fileUrl) {
+        window.location.href = res.fileUrl;
+        //delete the file
+        await deleteFile(res.fileUrl);
+      }
     } catch (error) {
       console.log("Failed to download the file.", error);
     }

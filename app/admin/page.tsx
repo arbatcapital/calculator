@@ -6,11 +6,15 @@ import {
   formatDate,
   formatName,
 } from "@/lib/utils";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import {
+  getKindeServerSession,
+  LogoutLink,
+} from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import DownloadSheet from "@/components/download-sheet";
+import { buttonVariants } from "@/components/ui/button";
 
 interface Role {
   id: string;
@@ -118,7 +122,12 @@ export default async function AdminPage() {
         <h1 className="text-3xl font-medium md:text-4xl text-center">
           Applications received
         </h1>
-        <DownloadSheet />
+        <div className="flex items-center justify-between">
+          <DownloadSheet />
+          <LogoutLink className={buttonVariants({ variant: "outline" })}>
+            Log out
+          </LogoutLink>
+        </div>
         <DataTable columns={columns} data={data} />
       </div>
     </div>
