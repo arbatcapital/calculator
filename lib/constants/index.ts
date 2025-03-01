@@ -187,10 +187,6 @@ export const NAVLINKS = [
     title: "FAQ",
     href: WEBSITE_FAQ_PAGE,
   },
-  {
-    title: "Contact",
-    href: WEBSITE_CONTACT,
-  },
 ] as const;
 
 export const defaultBusinessInfoFormValues = {
