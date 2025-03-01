@@ -1,12 +1,13 @@
 "use server";
-
+import ExcelJS from "exceljs";
+import path from "path";
 import { prisma } from "@/db";
 import {
   businessInfoFormSchema,
   personalInfoFormSchema,
   uploadDocumentsFormSchema,
 } from "../validators";
-import { formatError } from "../utils";
+import { formatAddress, formatError, formatStartDate } from "../utils";
 
 export const saveBusinessInfo = async (data: unknown, userId: string) => {
   try {
@@ -26,14 +27,33 @@ export const saveBusinessInfo = async (data: unknown, userId: string) => {
             update: {
               businessType: validatedData.businessType,
               businessName: validatedData.businessName,
-              fundingAmount: String(Number(validatedData.fundingAmount) * 1000),
+              dba: validatedData.dba,
+              fundingAmount: validatedData.fundingAmount,
               fundingReason: validatedData.fundingReason,
+              businessPropertyInfo: validatedData.businessPropertyInfo,
+              businessPropertyInfoOther:
+                validatedData.businessPropertyInfoOther,
+              businessStartDate: formatStartDate(
+                validatedData.businessStartMonth,
+                validatedData.businessStartYear
+              ),
               businessStartMonth: validatedData.businessStartMonth,
               businessStartYear: validatedData.businessStartYear,
+              businessWebsite: validatedData.businessWebsite,
+              businessEmailAddress: validatedData.businessEmailAddress,
+              businessPhone: validatedData.businessPhone,
               annualRevenue: validatedData.annualRevenue,
               ein: validatedData.ein,
-              businessState: validatedData.businessState,
-              businessAddress: validatedData.businessAddress,
+              businessAddressStreet: validatedData.businessAddressStreet,
+              businessAddressCity: validatedData.businessAddressCity,
+              businessAddressState: validatedData.businessAddressState,
+              businessAddressZip: validatedData.businessAddressZip,
+              completeBusinessAddress: formatAddress(
+                validatedData.businessAddressStreet,
+                validatedData.businessAddressCity,
+                validatedData.businessAddressState,
+                validatedData.businessAddressZip
+              ),
               stepOneCompleted: true,
             },
           },
@@ -52,14 +72,33 @@ export const saveBusinessInfo = async (data: unknown, userId: string) => {
             create: {
               businessType: validatedData.businessType,
               businessName: validatedData.businessName,
+              dba: validatedData.dba,
               fundingAmount: validatedData.fundingAmount,
               fundingReason: validatedData.fundingReason,
+              businessPropertyInfo: validatedData.businessPropertyInfo,
+              businessPropertyInfoOther:
+                validatedData.businessPropertyInfoOther,
+              businessStartDate: formatStartDate(
+                validatedData.businessStartMonth,
+                validatedData.businessStartYear
+              ),
               businessStartMonth: validatedData.businessStartMonth,
               businessStartYear: validatedData.businessStartYear,
+              businessWebsite: validatedData.businessWebsite,
+              businessEmailAddress: validatedData.businessEmailAddress,
+              businessPhone: validatedData.businessPhone,
               annualRevenue: validatedData.annualRevenue,
               ein: validatedData.ein,
-              businessState: validatedData.businessState,
-              businessAddress: validatedData.businessAddress,
+              businessAddressStreet: validatedData.businessAddressStreet,
+              businessAddressCity: validatedData.businessAddressCity,
+              businessAddressState: validatedData.businessAddressState,
+              businessAddressZip: validatedData.businessAddressZip,
+              completeBusinessAddress: formatAddress(
+                validatedData.businessAddressStreet,
+                validatedData.businessAddressCity,
+                validatedData.businessAddressState,
+                validatedData.businessAddressZip
+              ),
               stepOneCompleted: true,
             },
           },
@@ -91,11 +130,12 @@ export const savePersonalInfo = async (data: unknown, userId: string) => {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        name: validatedData.name,
+        fullName: `${validatedData.firstName} ${validatedData.lastName}`,
         email: validatedData.email,
         application: {
           update: {
-            name: validatedData.name,
+            firstName: validatedData.firstName,
+            lastName: validatedData.lastName,
             birthday: validatedData.birthday
               ? new Date(validatedData.birthday)
               : null,
@@ -103,11 +143,21 @@ export const savePersonalInfo = async (data: unknown, userId: string) => {
             email: validatedData.email,
             education: validatedData.education,
             homeOwnershipStatus: validatedData.homeOwnershipStatus,
+            homeOwnershipStatusOther: validatedData.homeOwnershipStatusOther,
             industry: validatedData.industry,
             employmentStatus: validatedData.employmentStatus,
             creditScore: validatedData.creditScore,
             ssn: validatedData.ssn,
-            homeAddress: validatedData.homeAddress,
+            homeAddressStreet: validatedData.homeAddressStreet,
+            homeAddressCity: validatedData.homeAddressCity,
+            homeAddressState: validatedData.homeAddressState,
+            homeAddressZip: validatedData.homeAddressZip,
+            completeHomeAddress: formatAddress(
+              validatedData.homeAddressStreet,
+              validatedData.homeAddressCity,
+              validatedData.homeAddressState,
+              validatedData.homeAddressZip
+            ),
             stepTwoCompleted: true,
           },
         },
@@ -140,12 +190,17 @@ export const saveDocs = async (data: unknown, userId: string) => {
       data: {
         application: {
           update: {
-            licenseDoc: validatedData.license || null,
-            businessAddressDoc: validatedData.businessAddressDoc || null,
-            einDoc: validatedData.ein || null,
             govIdDoc: validatedData.govId || null,
-            mercantProcessingStatement:
-              validatedData.mercantProcessingStatement || null,
+            annualReport: validatedData.annualReport || null,
+            articleOfIncorporation:
+              validatedData.articleOfIncorporation || null,
+            businessAddressProof: validatedData.businessAddressProof || null,
+            bankStatment1: validatedData.bankStatment1 || null,
+            bankStatment2: validatedData.bankStatment2 || null,
+            bankStatment3: validatedData.bankStatment3 || null,
+            signor: validatedData.signor,
+            entityName: validatedData.entityName,
+            dateofSubmission: validatedData.dateofSubmission,
             isCompleted: true,
           },
         },
@@ -170,14 +225,22 @@ export const getBusinessInfo = async (userId: string) => {
           select: {
             businessType: true,
             businessName: true,
+            dba: true,
+            businessPropertyInfo: true,
+            businessPropertyInfoOther: true,
             fundingAmount: true,
             fundingReason: true,
             businessStartMonth: true,
             businessStartYear: true,
             annualRevenue: true,
             ein: true,
-            businessState: true,
-            businessAddress: true,
+            businessAddressStreet: true,
+            businessAddressState: true,
+            businessAddressZip: true,
+            businessAddressCity: true,
+            businessWebsite: true,
+            businessPhone: true,
+            businessEmailAddress: true,
             stepOneCompleted: true,
           },
         },
@@ -201,17 +264,22 @@ export const getPersonalInfo = async (userId: string) => {
       include: {
         application: {
           select: {
-            name: true,
+            firstName: true,
+            lastName: true,
             birthday: true,
             phoneNumber: true,
             email: true,
             education: true,
             homeOwnershipStatus: true,
+            homeOwnershipStatusOther: true,
             industry: true,
             employmentStatus: true,
             creditScore: true,
             ssn: true,
-            homeAddress: true,
+            homeAddressStreet: true,
+            homeAddressState: true,
+            homeAddressZip: true,
+            homeAddressCity: true,
             stepTwoCompleted: true,
           },
         },
@@ -231,3 +299,171 @@ export const getPersonalInfo = async (userId: string) => {
     return { success: false, message: formatError(error) };
   }
 };
+
+export async function getSignor(userId: string) {
+  try {
+    if (!userId) throw new Error("Please provide a user Id");
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        fullName: true,
+      },
+    });
+
+    if (user) {
+      return { success: true, message: "User found", user: user };
+    }
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+export async function exportToExcel() {
+  try {
+    const applications = await prisma.application.findMany({
+      where: { isCompleted: true },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (applications.length === 0) {
+      return {
+        success: false,
+        message: "No data to download",
+        fileUrl: null,
+      };
+    }
+
+    const columns = [
+      { header: "Business Type", key: "businessType", width: 20 },
+      { header: "Business Name", key: "businessName", width: 25 },
+      { header: "DBA", key: "dba", width: 25 },
+      {
+        header: "Business Property Info",
+        key: "businessPropertyInfo",
+        width: 30,
+      },
+      {
+        header: "Other Property Info (If any)",
+        key: "businessPropertyInfoOther",
+        width: 30,
+      },
+      { header: "Funding Amount", key: "fundingAmount", width: 15 },
+      { header: "Business Website", key: "businessWebsite", width: 30 },
+      { header: "Business Email", key: "businessEmailAddress", width: 30 },
+      { header: "Business Phone", key: "businessPhone", width: 20 },
+      { header: "Funding Reason", key: "fundingReason", width: 30 },
+      { header: "Business Start Month", key: "businessStartMonth", width: 15 },
+      { header: "Business Start Year", key: "businessStartYear", width: 15 },
+      { header: "Business Start Date", key: "businessStartDate", width: 20 },
+      { header: "Annual Revenue ($USD)", key: "annualRevenue", width: 15 },
+      { header: "EIN", key: "ein", width: 15 },
+      { header: "Business Address", key: "completeBusinessAddress", width: 40 },
+      { header: "First Name", key: "firstName", width: 20 },
+      { header: "Last Name", key: "lastName", width: 20 },
+      { header: "Birthday", key: "birthday", width: 15 },
+      { header: "Phone Number", key: "phoneNumber", width: 20 },
+      { header: "Email", key: "email", width: 30 },
+      { header: "Education", key: "education", width: 20 },
+      {
+        header: "Home Ownership Status",
+        key: "homeOwnershipStatus",
+        width: 25,
+      },
+      {
+        header: "Home Ownership Other (if any)",
+        key: "homeOwnershipStatusOther",
+        width: 25,
+      },
+      { header: "Industry", key: "industry", width: 20 },
+      { header: "Employment Status", key: "employmentStatus", width: 25 },
+      { header: "Credit Score", key: "creditScore", width: 15 },
+      { header: "Home Address", key: "completeHomeAddress", width: 40 },
+      { header: "SSN", key: "ssn", width: 20 },
+      { header: "Signor", key: "signor", width: 20 },
+      { header: "Entity Name", key: "entityName", width: 30 },
+      { header: "Submission Date", key: "dateofSubmission", width: 20 },
+
+      // Document Links (Hyperlinks)
+      { header: "Gov ID Document", key: "govIdDoc", width: 30 },
+      { header: "Annual Report", key: "annualReport", width: 30 },
+      {
+        header: "Articles of Incorporation",
+        key: "articleOfIncorporation",
+        width: 30,
+      },
+      {
+        header: "Business Address Proof",
+        key: "businessAddressProof",
+        width: 30,
+      },
+      { header: "Bank Statement 1", key: "bankStatment1", width: 30 },
+      { header: "Bank Statement 2", key: "bankStatment2", width: 30 },
+      { header: "Bank Statement 3", key: "bankStatment3", width: 30 },
+    ];
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Applications");
+
+    worksheet.columns = columns;
+
+    applications.forEach((app) => {
+      const row = worksheet.addRow(app);
+
+      const linkFields = [
+        "govIdDoc",
+        "annualReport",
+        "articleOfIncorporation",
+        "businessAddressProof",
+        "bankStatment1",
+        "bankStatment2",
+        "bankStatment3",
+      ] as const;
+
+      linkFields.forEach((field) => {
+        if (app[field]) {
+          const cell = row.getCell(
+            columns.findIndex((col) => col.key === field) + 1
+          );
+          cell.value = { text: "View Document", hyperlink: app[field] };
+          cell.font = { color: { argb: "0000FF" }, underline: true };
+        }
+      });
+    });
+
+    worksheet.columns.forEach((column) => {
+      let maxLength = column.width || 10;
+      column.eachCell?.((cell) => {
+        const cellValue = cell.value ? cell.value.toString() : "";
+        maxLength = Math.max(maxLength, cellValue.length);
+      });
+      column.width = maxLength + 2;
+    });
+
+    // Save file
+    const fileName = `${Date.now()}_applications.xlsx`;
+    const filePath = path.join(
+      process.cwd(),
+      "public",
+      "applications",
+      fileName
+    );
+    await workbook.xlsx.writeFile(filePath);
+    const fileUrl = `/applications/${fileName}`;
+    return {
+      success: true,
+      message: "File downloaded successfully",
+      fileUrl: fileUrl,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "Failed to download",
+      fileUrl: null,
+    };
+  }
+}

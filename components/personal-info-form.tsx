@@ -9,14 +9,16 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalInfo, savePersonalInfo } from "@/lib/actions";
 import {
+  BUSINESS_STATE,
   CREDIT_SCORE,
   defaultPersonalInfoFormValues,
+  EDUCATION,
   EMPLOYMENT_STATUS,
   HOME_OWNERSHIP,
   INDUSTRY,
 } from "@/lib/constants";
 import { TPersonalInfoForm } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, formatSSN } from "@/lib/utils";
 import { personalInfoFormSchema } from "@/lib/validators";
 import {
   Field,
@@ -53,6 +55,8 @@ const PersonalInfoForm = () => {
     resolver: zodResolver(personalInfoFormSchema),
     defaultValues: defaultPersonalInfoFormValues,
   });
+
+  const homeOwnershipStatus = form.watch("homeOwnershipStatus");
 
   const onSubmit = async (formData: TPersonalInfoForm) => {
     startTransition(async () => {
@@ -91,6 +95,15 @@ const PersonalInfoForm = () => {
     }
   }, [form, router]);
 
+  useEffect(
+    function () {
+      if (homeOwnershipStatus !== "other") {
+        form.setValue("homeOwnershipStatusOther", "");
+      }
+    },
+    [homeOwnershipStatus, form]
+  );
+
   if (isLoading) {
     return (
       <div className=" flex items-center justify-center w-full">
@@ -106,16 +119,36 @@ const PersonalInfoForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="name"
+              name="firstName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What is your name?
+                    What is your first name?
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="text"
-                      placeholder="Enter your name"
+                      placeholder="Enter your first name"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="mb-3 sm:mb-2 inline-block">
+                    What is your last name?
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter your last name"
                       value={field.value}
                       onChange={field.onChange}
                     />
@@ -182,25 +215,7 @@ const PersonalInfoForm = () => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="homeAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What is your home address?
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter your address"
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* TODO */}
             <FormField
               control={form.control}
               name="education"
@@ -209,14 +224,21 @@ const PersonalInfoForm = () => {
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
                     What is your highest level of education?
                   </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Enter qualiications"
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Education" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {EDUCATION.map((education) => (
+                        <SelectItem key={education} value={education}>
+                          {education}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -254,6 +276,24 @@ const PersonalInfoForm = () => {
                 </FormItem>
               )}
             />
+
+            {homeOwnershipStatus === "Other" && (
+              <FormField
+                control={form.control}
+                name="homeOwnershipStatusOther"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-3 sm:mb-2 inline-block">
+                      Please specify
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Other" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="industry"
@@ -265,7 +305,7 @@ const PersonalInfoForm = () => {
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Funding reason" />
+                        <SelectValue placeholder="Industry" />
                       </SelectTrigger>
                       <SelectContent>
                         {INDUSTRY.map((industry) => (
@@ -359,13 +399,94 @@ const PersonalInfoForm = () => {
                       type="text"
                       placeholder="Enter your SSN"
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(e) => {
+                        field.onChange(formatSSN(e.target.value));
+                      }}
+                      maxLength={11}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className="flex flex-col gap-2">
+              <FormField
+                control={form.control}
+                name="homeAddressStreet"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-3 sm:mb-2 inline-block">
+                      What is your home address?
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Enter street address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="homeAddressState"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {BUSINESS_STATE.map((state) => (
+                          <SelectItem key={state} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-4 justify-stretch">
+                <FormField
+                  control={form.control}
+                  name="homeAddressCity"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="City"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="homeAddressZip"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Zip code"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             <div className="flex gap-6 md:gap-8">
               <Link
                 href={"/"}

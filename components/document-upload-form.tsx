@@ -10,10 +10,18 @@ import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import FileInput from "./file-input";
 import { Button, buttonVariants } from "./ui/button";
-import { Form } from "./ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { saveDocs } from "@/lib/actions";
+import { cn, getLastThreeMonths } from "@/lib/utils";
+import { getSignor, saveDocs } from "@/lib/actions";
+import { Input } from "./ui/input";
 
 const DocumentUploadForm = () => {
   const [isPending, startTransition] = useTransition();
@@ -48,6 +56,7 @@ const DocumentUploadForm = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const userId = localStorage.getItem("userId");
+
       if (userId) {
         setUserId(userId);
       } else {
@@ -56,22 +65,26 @@ const DocumentUploadForm = () => {
     }
   }, [router]);
 
+  useEffect(() => {
+    (async () => {
+      const userId = localStorage.getItem("userId");
+      if (userId) {
+        const res = await getSignor(userId);
+        if (res && res.user?.fullName) {
+          form.setValue("entityName", res.user.fullName);
+        } else {
+          form.setValue("entityName", "NO_NAME");
+        }
+        form.setValue("dateofSubmission", new Date().toLocaleDateString());
+      }
+    })();
+  }, [form]);
+
   return (
     <section className="">
       <div className="bg-gray1 p-6 md:p-8 rounded-3xl">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FileInput form={form} name={"license"} label="Business License" />
-            <FileInput
-              form={form}
-              name={"ein"}
-              label="Employer Identification Number"
-            />
-            <FileInput
-              form={form}
-              name={"mercantProcessingStatement"}
-              label="Merchant Processing Statements"
-            />
             <FileInput
               form={form}
               name={"govId"}
@@ -79,8 +92,105 @@ const DocumentUploadForm = () => {
             />
             <FileInput
               form={form}
-              name={"businessAddressDoc"}
-              label="Proof of Business Address"
+              name={"annualReport"}
+              label="State division of corporation / Annual report ( if applicable)"
+            />
+            <FileInput
+              form={form}
+              name={"articleOfIncorporation"}
+              label="Business articles of incorporation (if applicable)"
+            />
+
+            <FileInput
+              form={form}
+              name={"businessAddressProof"}
+              label="Proof of business address"
+            />
+
+            <FileInput
+              form={form}
+              name={"bankStatment1"}
+              label={`${getLastThreeMonths()[0]} bank statment`}
+            />
+
+            <FileInput
+              form={form}
+              name={"bankStatment2"}
+              label={`${getLastThreeMonths()[1]}  bank statment`}
+            />
+
+            <FileInput
+              form={form}
+              name={"bankStatment3"}
+              label={`${getLastThreeMonths()[2]}  bank statment`}
+            />
+            <div className="flex items-center justify-between">
+              <div>
+                <FormField
+                  control={form.control}
+                  name="entityName"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel className="mb-3 sm:mb-2 inline-block">
+                        Entity name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Entity name"
+                          value={field.value}
+                          onChange={field.onChange}
+                          disabled
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div>
+                <FormField
+                  control={form.control}
+                  name="dateofSubmission"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel className="mb-3 sm:mb-2 inline-block">
+                        Date
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Date"
+                          value={field.value}
+                          onChange={field.onChange}
+                          disabled
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <FormField
+              control={form.control}
+              name="signor"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="mb-3 sm:mb-2 inline-block">
+                    As authorized signor for &quot;Entity name&quot;
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Entity sign"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             <div className="flex gap-6 md:gap-8">
@@ -107,6 +217,17 @@ const DocumentUploadForm = () => {
                 )}
               </Button>
             </div>
+
+            <p className="text-sm leading-6 text-muted-foreground">
+              You understand that by signing below you are providing
+              &quot;written instructions&quot; to Lexington Financial
+              Consultants, LLC DBA Lexio Capital under the Fair Credit Reporting
+              Act, authorizing Arbat Capital LLC to obtain information from your
+              personal credit profile or other information from Experian,
+              Transunion and/or Equifax. You authorize Arbat Capital LLC to
+              obtain such information solely to conduct a per-qualification for
+              credit and/or cash advance obtention purposes.
+            </p>
           </form>
         </Form>
       </div>

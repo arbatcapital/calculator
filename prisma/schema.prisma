@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   id            String       @id @default(uuid())
-  name          String       @default("N0_NAME")
+  fullName      String       @default("N0_NAME")
   emailVerified Boolean      @default(false)
   email         String?      @unique
   createdAt     DateTime     @default(now())
@@ -23,39 +23,60 @@ model User {
 }
 
 model Application {
-  id                         String    @id @default(uuid())
-  businessType               String?
-  businessName               String?
-  fundingAmount              String?
-  fundingReason              String?
-  businessStartMonth         String?
-  businessStartYear          String?
-  annualRevenue              String?
-  ein                        String?
-  businessState              String?
-  businessAddress            String?
-  name                       String?
-  birthday                   DateTime?
-  phoneNumber                String?
-  email                      String?   @unique
-  education                  String?
-  homeOwnershipStatus        String?
-  industry                   String?
-  employmentStatus           String?
-  creditScore                String?
-  homeAddress                String?
-  licenseDoc                 String?
-  businessAddressDoc         String?
-  einDoc                     String?
-  govIdDoc                   String?
-  mpsDoc                     String?
-  mercantProcessingStatement String?
-  stepOneCompleted           Boolean   @default(false)
-  stepTwoCompleted           Boolean   @default(false)
-  isCompleted                Boolean   @default(false)
-  ssn                        String?   @unique
-  createdAt                  DateTime  @default(now())
-  updatedAt                  DateTime  @updatedAt
-  user                       User?     @relation(fields: [userId], references: [id])
-  userId                     String?   @unique
+  id                        String    @id @default(uuid())
+  businessType              String?
+  businessName              String?
+  dba                       String?
+  businessPropertyInfo      String?
+  businessPropertyInfoOther String?
+  fundingAmount             String?
+  businessWebsite           String?
+  businessEmailAddress      String?   @unique
+  businessPhone             String?
+  fundingReason             String?
+  businessStartMonth        String?
+  businessStartYear         String?
+  businessStartDate         String?
+  annualRevenue             String?
+  ein                       String?
+  businessAddressStreet     String?
+  businessAddressState      String?
+  businessAddressCity       String?
+  businessAddressZip        String?
+  completeBusinessAddress   String?
+  firstName                 String?
+  lastName                  String?
+  birthday                  DateTime?
+  phoneNumber               String?
+  email                     String?   @unique
+  education                 String?
+  homeOwnershipStatus       String?
+  homeOwnershipStatusOther  String?
+  industry                  String?
+  employmentStatus          String?
+  creditScore               String?
+  homeAddressStreet         String?
+  homeAddressState          String?
+  homeAddressCity           String?
+  homeAddressZip            String?
+  completeHomeAddress       String?
+  ssn                       String?
+  govIdDoc                  String?
+  annualReport              String?
+  articleOfIncorporation    String?
+  businessAddressProof      String?
+  signor                    String?
+  entityName                String?
+  dateofSubmission          String?
+
+  bankStatment1    String?
+  bankStatment2    String?
+  bankStatment3    String?
+  stepOneCompleted Boolean  @default(false)
+  stepTwoCompleted Boolean  @default(false)
+  isCompleted      Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User?    @relation(fields: [userId], references: [id])
+  userId           String?  @unique
 }

@@ -32,7 +32,7 @@ export function formatError(error: any) {
 
 export function convertToNumber(str: string | null) {
   if (str) {
-    return Number(str);
+    return Number(str.replaceAll(",", ""));
   }
   return NaN;
 }
@@ -48,4 +48,75 @@ export function convertToUrl(str: string | null) {
     return new URL(str);
   }
   return null;
+}
+
+export const getLastThreeMonths = () => {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const today = new Date();
+  const lastThreeMonths = [];
+
+  for (let i = 1; i <= 3; i++) {
+    const monthIndex = (today.getMonth() - i + 12) % 12;
+    lastThreeMonths.push(months[monthIndex]);
+  }
+
+  return lastThreeMonths;
+};
+
+export function formatSSN(value: string) {
+  const rawValue = value.replace(/\D/g, "");
+  let formattedValue = rawValue;
+  if (rawValue.length > 3 && rawValue.length <= 5) {
+    formattedValue = `${rawValue.slice(0, 3)}-${rawValue.slice(3)}`;
+  } else if (rawValue.length > 5) {
+    formattedValue = `${rawValue.slice(0, 3)}-${rawValue.slice(
+      3,
+      5
+    )}-${rawValue.slice(5, 9)}`;
+  }
+
+  return formattedValue;
+}
+
+export function formatEIN(value: string) {
+  const rawValue = value.replace(/\D/g, "");
+  let formattedValue = rawValue;
+  if (rawValue.length > 2) {
+    formattedValue = `${rawValue.slice(0, 2)}-${rawValue.slice(2)}`;
+  }
+  return formattedValue;
+}
+
+export function formatAddress(
+  street: string,
+  city: string,
+  state: string,
+  zip: string
+) {
+  return `${street}, ${city}, ${state} ${zip}`;
+}
+
+export function formatStartDate(month: string, year: string) {
+  return `${month}-${year}`;
+}
+
+export function formatName(f: string | null, l: string | null) {
+  if (f && l) {
+    return `${f} ${l}`;
+  }
+  return "NO_NAME";
 }

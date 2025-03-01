@@ -1,55 +1,115 @@
 import { prisma } from "@/db";
 import { TDataTableSchema } from "@/lib/types";
-import { convertToNumber, formatDate } from "@/lib/utils";
+import {
+  convertToNumber,
+  formatAddress,
+  formatDate,
+  formatName,
+} from "@/lib/utils";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { redirect } from "next/navigation";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import DownloadSheet from "@/components/download-sheet";
+
+interface Role {
+  id: string;
+  key: string;
+  name: string;
+}
 
 async function getData(): Promise<TDataTableSchema[]> {
   const res = await prisma.application.findMany({
     where: {
       isCompleted: true,
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
-  const data = res.map((res) => {
+  const data = res.map((res, i) => {
     return {
-      name: res.name,
-      email: res.email,
-      phone: res.phoneNumber,
+      serialNumber: i + 1,
+      dateofSubmission: res.dateofSubmission,
+      fullName: formatName(res.firstName, res.lastName),
+      personalContact: {
+        email: res.email,
+        phone: res.phoneNumber,
+      },
+      businessContact: {
+        businessWebsite: res.businessWebsite,
+        businessEmailAddress: res.businessEmailAddress,
+        businessPhone: res.businessPhone,
+      },
       businessType: res.businessType,
-      amount: convertToNumber(res.fundingAmount),
+      dba: res.dba,
+      businessPropertyInfo:
+        res.businessPropertyInfo || res.businessPropertyInfoOther,
+      fundingAmount: convertToNumber(res.fundingAmount),
       businessName: res.businessName,
       fundingReason: res.fundingReason,
       businessStartDate: formatDate(
         res.businessStartMonth,
         res.businessStartYear
       ),
-      businessState: res.businessState,
+
       ein: res.ein,
-      businessAddress: res.businessAddress,
+      completeBusinessAddress: formatAddress(
+        res.businessAddressStreet!,
+        res.businessAddressCity!,
+        res.businessAddressState!,
+        res.businessAddressZip!
+      ),
       birthday: res.birthday?.toLocaleDateString(),
-      homeAddress: res.homeAddress,
+      completeHomeAddress: formatAddress(
+        res.homeAddressStreet!,
+        res.homeAddressCity!,
+        res.homeAddressState!,
+        res.homeAddressZip!
+      ),
       education: res.education,
-      homeOwnership: res.homeOwnershipStatus,
+      homeOwnershipStatus:
+        res.homeOwnershipStatus || res.homeOwnershipStatusOther,
       industry: res.industry,
       employmentStatus: res.employmentStatus,
       creditScore: res.creditScore,
       docs: {
-        licenseDoc: res.licenseDoc,
-        einDoc: res.einDoc,
-        mpsDoc: res.mpsDoc,
-        govIdDoc: res.govIdDoc,
-        businessAddressDoc: res.businessAddressDoc,
+        annualReport: res.annualReport,
+        articleOfIncorporation: res.articleOfIncorporation,
+        businessAddressProof: res.businessAddressProof,
+        govId: res.govIdDoc,
+        bankStatment1: res.bankStatment1,
+        bankStatment2: res.bankStatment2,
+        bankStatment3: res.bankStatment3,
       },
       revenue: convertToNumber(res.annualRevenue),
       ssn: res.ssn,
+      signor: res.signor,
     };
   });
 
   return data;
 }
 
-export default async function DemoPage() {
+export default async function AdminPage() {
+  const { isAuthenticated, getClaim } = getKindeServerSession();
+  if (!isAuthenticated) redirect("/api/auth/login");
+  const claim = await getClaim("roles", "access_token");
+  let roles: Role[] = [];
+  if (claim?.value) {
+    try {
+      roles =
+        typeof claim.value === "string" ? JSON.parse(claim.value) : claim.value;
+    } catch (error) {
+      console.log("Error parsing roles claim", error);
+    }
+  }
+  const hasAdminRole = roles.some((x) => x.key === "admin");
+  if (!hasAdminRole) {
+    redirect("/unauthorized");
+  }
+
   const data = await getData();
 
   return (
@@ -58,6 +118,7 @@ export default async function DemoPage() {
         <h1 className="text-3xl font-medium md:text-4xl text-center">
           Applications received
         </h1>
+        <DownloadSheet />
         <DataTable columns={columns} data={data} />
       </div>
     </div>

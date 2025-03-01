@@ -17,15 +17,18 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { getBusinessInfo, saveBusinessInfo } from "@/lib/actions";
 import {
+  BUSINESS_PROPERTY_INFO,
   BUSINESS_STATE,
   BUSINESS_TYPE,
   defaultBusinessInfoFormValues,
   FUNDING_AMOUNT,
   FUNDING_REASON,
+  MONTHS,
+  YEARS,
 } from "@/lib/constants";
 import { TBusinessInfoForm } from "@/lib/types";
 import { businessInfoFormSchema } from "@/lib/validators";
-import { ArrowRight, Loader } from "lucide-react";
+import { ArrowRight, DollarSign, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -40,6 +43,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { formatEIN } from "@/lib/utils";
 
 const BusinessInfoForm = () => {
   const [isPending, startTransition] = useTransition();
@@ -51,6 +55,8 @@ const BusinessInfoForm = () => {
     resolver: zodResolver(businessInfoFormSchema),
     defaultValues: defaultBusinessInfoFormValues,
   });
+
+  const businessPropertyInfo = form.watch("businessPropertyInfo");
 
   const onSubmit = async (formData: TBusinessInfoForm) => {
     startTransition(async () => {
@@ -85,6 +91,15 @@ const BusinessInfoForm = () => {
       })();
     }
   }, [form]);
+
+  useEffect(
+    function () {
+      if (businessPropertyInfo !== "other") {
+        form.setValue("businessPropertyInfoOther", "");
+      }
+    },
+    [businessPropertyInfo, form]
+  );
 
   if (isLoading) {
     return (
@@ -134,16 +149,89 @@ const BusinessInfoForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What is your business name?
+                    What is your business legal name?
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter business name" {...field} />
+                    <Input
+                      placeholder="Enter business name"
+                      {...field}
+                      maxLength={40}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="dba"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="mb-3 sm:mb-2 inline-block">
+                    What is your DBA
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter DBA" {...field} maxLength={40} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="businessPropertyInfo"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between gap-1 md:gap-4 mb-4 flex-wrap">
+                    <FormLabel className="mb-3 sm:mb-2 inline-block">
+                      Business property information
+                    </FormLabel>{" "}
+                  </div>
+                  <FormControl>
+                    <RgGroup
+                      value={field.value}
+                      onChange={field.onChange}
+                      className={"flex gap-2 md:gap-4 flex-wrap"}
+                    >
+                      {BUSINESS_PROPERTY_INFO.map((info) => (
+                        <Field
+                          key={info}
+                          className="flex items-center gap-2 relative py-3 px-6 rounded-md bg-white hover:cursor-pointer"
+                        >
+                          <Radio
+                            value={info}
+                            className="absolute inset-0 rounded-md border-[2px] border-solid border-gray-200  data-[checked]:border-primary-blue"
+                          >
+                            <span className="invisible size-2 rounded-full bg-white group-data-[checked]:visible" />
+                          </Radio>
+                          <UILabel>{info}</UILabel>
+                        </Field>
+                      ))}
+                    </RgGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {businessPropertyInfo === "Other" && (
+              <FormField
+                control={form.control}
+                name="businessPropertyInfoOther"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-3 sm:mb-2 inline-block">
+                      Please specify
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Other" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="fundingAmount"
@@ -153,7 +241,7 @@ const BusinessInfoForm = () => {
                     <FormLabel className="mb-3 sm:mb-2 inline-block">
                       How much do you need?
                     </FormLabel>{" "}
-                    <span className="text-muted-foreground">[Value in k]</span>
+                    <span className="text-muted-foreground">$USD</span>
                   </div>
                   <FormControl>
                     <RgGroup
@@ -192,7 +280,7 @@ const BusinessInfoForm = () => {
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Finance Accounts receivable" />
+                        <SelectValue placeholder="Marketing" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -218,14 +306,24 @@ const BusinessInfoForm = () => {
                   name="businessStartMonth"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Month"
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      </FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="January" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {MONTHS.map((month) => (
+                            <SelectItem key={month} value={month}>
+                              {month}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
                       <FormMessage />
                     </FormItem>
                   )}
@@ -235,14 +333,24 @@ const BusinessInfoForm = () => {
                   name="businessStartYear"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Year"
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      </FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="2025" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {YEARS.map((year) => (
+                            <SelectItem key={year} value={year}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
                       <FormMessage />
                     </FormItem>
                   )}
@@ -258,17 +366,26 @@ const BusinessInfoForm = () => {
                     What&apos;s your annual revenue?
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="text"
-                      value={
-                        field.value ? Number(field.value).toLocaleString() : ""
-                      }
-                      onChange={(e) => {
-                        const rawValue = e.target.value.replace(/[^0-9]/g, "");
-                        field.onChange(rawValue);
-                      }}
-                      placeholder="Enter annual revenue"
-                    />
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        value={
+                          field.value
+                            ? Number(field.value).toLocaleString()
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
+                          field.onChange(rawValue);
+                        }}
+                        placeholder="Enter annual revenue"
+                        maxLength={10}
+                      />
+                      <DollarSign className="absolute top-[50%] -translate-y-[50%] right-2 text-muted-foreground h-5 w-5" />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -287,6 +404,30 @@ const BusinessInfoForm = () => {
                       type="text"
                       placeholder="Enter EIN"
                       value={field.value}
+                      onChange={(e) =>
+                        field.onChange(formatEIN(e.target.value))
+                      }
+                      maxLength={10}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="businessWebsite"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="mb-3 sm:mb-2 inline-block">
+                    Business website
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter website"
+                      value={field.value}
                       onChange={field.onChange}
                     />
                   </FormControl>
@@ -296,46 +437,126 @@ const BusinessInfoForm = () => {
             />
             <FormField
               control={form.control}
-              name="businessState"
+              name="businessEmailAddress"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    Which state was your company formed?
+                    Business email
                   </FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="New York" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {BUSINESS_STATE.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter email"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="businessAddress"
+              name="businessPhone"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What is your business address?
+                    Business phone
                   </FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter address" {...field} />
+                    <Input
+                      type="text"
+                      placeholder="Enter phone"
+                      value={field.value}
+                      onChange={field.onChange}
+                      maxLength={10}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className="flex flex-col gap-2">
+              <FormField
+                control={form.control}
+                name="businessAddressStreet"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-3 sm:mb-2 inline-block">
+                      What is your business address?
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Enter street address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="businessAddressState"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {BUSINESS_STATE.map((state) => (
+                          <SelectItem key={state} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-4 justify-stretch">
+                <FormField
+                  control={form.control}
+                  name="businessAddressCity"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="City"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="businessAddressZip"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Zip code"
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(e.target.value.replace(/\D/g, ""));
+                          }}
+                          maxLength={5}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             <div className="flex flex-col">
               <Button disabled={isPending} type="submit" variant={"custom"}>
                 Next

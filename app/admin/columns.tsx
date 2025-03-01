@@ -14,21 +14,18 @@ import { MoreHorizontalIcon } from "lucide-react";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Payment = {
-  amount: number;
-  email: string;
-  fullname: string;
-};
 
 export const columns: ColumnDef<TDataTableSchema>[] = [
   {
     id: "docs",
     cell: ({ row }) => {
-      const einDoc = row.original.docs.einDoc;
-      const mpsDoc = row.original.docs.mpsDoc;
-      const govId = row.original.docs.govIdDoc;
-      const businessAddress = row.original.docs.businessAddressDoc;
-      const licenseDoc = row.original.docs.licenseDoc;
+      const annualReport = row.original.docs.annualReport;
+      const articleOfIncorporation = row.original.docs.articleOfIncorporation;
+      const businessAddressProof = row.original.docs.businessAddressProof;
+      const govId = row.original.docs.govId;
+      const bankStatment1 = row.original.docs.bankStatment1;
+      const bankStatment2 = row.original.docs.bankStatment2;
+      const bankStatment3 = row.original.docs.bankStatment3;
 
       return (
         <DropdownMenu>
@@ -41,29 +38,29 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Documents</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {licenseDoc ? (
+            {annualReport ? (
               <DropdownMenuItem>
                 <a
-                  href={licenseDoc}
-                  download={"ein.pdf"}
+                  href={annualReport}
+                  download={"annualReport.pdf"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  License document
+                  Annual Report
                 </a>
               </DropdownMenuItem>
             ) : (
               ""
             )}
-            {businessAddress ? (
+            {articleOfIncorporation ? (
               <DropdownMenuItem>
                 <a
-                  href={businessAddress}
-                  download={"ein.pdf"}
+                  href={articleOfIncorporation}
+                  download={"articleOfIncorporation.pdf"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Business address
+                  Article of Incorporation
                 </a>
               </DropdownMenuItem>
             ) : (
@@ -73,7 +70,7 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
               <DropdownMenuItem>
                 <a
                   href={govId}
-                  download={"ein.pdf"}
+                  download={"govId.pdf"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -83,29 +80,58 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
             ) : (
               ""
             )}
-            {mpsDoc ? (
+            {businessAddressProof ? (
               <DropdownMenuItem>
                 <a
-                  href={mpsDoc}
-                  download={"ein.pdf"}
+                  href={businessAddressProof}
+                  download={"businessAddressProof.pdf"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Membership Processing Statement
+                  Proof of Business Address
                 </a>
               </DropdownMenuItem>
             ) : (
               ""
             )}
-            {einDoc ? (
+
+            {bankStatment1 ? (
               <DropdownMenuItem>
                 <a
-                  href={einDoc}
+                  href={bankStatment1}
                   download={"ein.pdf"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  EIN Document
+                  Bank Statement 1
+                </a>
+              </DropdownMenuItem>
+            ) : (
+              ""
+            )}
+            {bankStatment2 ? (
+              <DropdownMenuItem>
+                <a
+                  href={bankStatment2}
+                  download={"ein.pdf"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Bank Statement 2
+                </a>
+              </DropdownMenuItem>
+            ) : (
+              ""
+            )}
+            {bankStatment3 ? (
+              <DropdownMenuItem>
+                <a
+                  href={bankStatment3}
+                  download={"ein.pdf"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Bank Statement 3
                 </a>
               </DropdownMenuItem>
             ) : (
@@ -117,13 +143,44 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
     },
   },
   {
-    accessorKey: "name",
+    accessorKey: "serialNumber",
+    header: "No",
+  },
+
+  {
+    accessorKey: "dateofSubmission",
+    header: "Submission date",
+    cell: ({ row }) => {
+      const date = row.getValue("dateofSubmission") as string;
+
+      return <div>{date}</div>;
+    },
+  },
+
+  {
+    accessorKey: "fullname",
     header: "Applicant name",
+    cell: ({ row }) => {
+      const name = row.original.fullName;
+      return <div>{name}</div>;
+    },
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "personalContact",
+    header: "Personal Contant Info",
+    cell: ({ row }) => {
+      const email = row.original.personalContact.email;
+      const phone = row.original.personalContact.phone;
+
+      return (
+        <ul className="flex gap-2 flex-col">
+          <li>{email}</li>
+          <li>{phone}</li>
+        </ul>
+      );
+    },
   },
+
   {
     accessorKey: "businessType",
     header: "Business Type",
@@ -134,10 +191,28 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
   },
 
   {
-    accessorKey: "amount",
-
+    accessorKey: "businessContact",
+    header: "Business Contact Info",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
+      const email = row.original.businessContact.businessEmailAddress;
+      const phone = row.original.businessContact.businessPhone;
+      const website = row.original.businessContact.businessWebsite;
+
+      return (
+        <ul className="flex gap-2 flex-col">
+          <li>{email}</li>
+          <li>{phone}</li>
+          <li>{website}</li>
+        </ul>
+      );
+    },
+  },
+
+  {
+    accessorKey: "fundingAmount",
+    header: "Funding Amount",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("fundingAmount"));
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -146,6 +221,15 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
 
       return <div>{formatted}</div>;
     },
+  },
+  {
+    accessorKey: "dba",
+    header: "DBA",
+  },
+
+  {
+    accessorKey: "businessPropertyInfo",
+    header: "Business Property Info",
   },
 
   {
@@ -159,38 +243,48 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
   {
     accessorKey: "revenue",
     header: "Annual Revenue",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("revenue"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      }).format(amount);
+
+      return <div>{formatted}</div>;
+    },
   },
   {
     accessorKey: "ein",
     header: "EIN",
   },
+
   {
-    accessorKey: "businessState",
-    header: "Business State",
-  },
-  {
-    accessorKey: "businessAddress",
+    accessorKey: "completeBusinessAddress",
     header: "Business Address",
+    cell: ({ row }) => {
+      return <div className="">{row.getValue("completeBusinessAddress")}</div>;
+    },
   },
 
   {
     accessorKey: "birthday",
     header: "Birth Day",
   },
+
   {
-    accessorKey: "phone",
-    header: "Phone Number",
-  },
-  {
-    accessorKey: "homeAddress",
+    accessorKey: "completeHomeAddress",
     header: "Home Address",
+    cell: ({ row }) => {
+      return <div className="">{row.getValue("completeHomeAddress")}</div>;
+    },
   },
   {
     accessorKey: "education",
     header: "Education",
   },
   {
-    accessorKey: "homeOwnership",
+    accessorKey: "homeOwnershipStatus",
     header: "Home Ownership",
   },
   {
@@ -208,5 +302,10 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
   {
     accessorKey: "ssn",
     header: "SSN",
+  },
+
+  {
+    accessorKey: "signor",
+    header: "Signor",
   },
 ];
