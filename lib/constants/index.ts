@@ -164,11 +164,9 @@ export const YEARS = Array.from({ length: 2025 - 1900 + 1 }, (_, i) =>
 export const WEBSITE_HOME_PAGE =
   process.env.HOME_PAGE_URL || "https://www.arbat-capital.io";
 export const WEBSITE_ABOUT_PAGE =
-  process.env.ABOUT_PAGE_URL || "https://www.arbat-capital.io/about";
+  process.env.ABOUT_PAGE_URL || "https://www.arbat-capital.io/about-us";
 export const WEBSITE_FAQ_PAGE =
   process.env.FAQ_PAGE_URL || "https://www.arbat-capital.io/faq";
-export const WEBSITE_CONTACT =
-  process.env.CONTACT_PAGE_URL || "https://www.arbat-capital.io/contact";
 export const WEBSITE_APPLY_NOW =
   process.env.APPLY_PAGE_URL || "app.arbat-capital.io";
 
