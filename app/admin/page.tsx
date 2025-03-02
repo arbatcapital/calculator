@@ -120,7 +120,7 @@ export default async function AdminPage() {
     <div className="container mx-auto py-large px-4 md:px-8 mx-w-[1440px] mxa-auto">
       <div className="space-y-4 md:space-y-8">
         <h1 className="text-3xl font-medium md:text-4xl text-center">
-          Applications submitted
+          Applications
         </h1>
         <div className="flex items-center justify-between">
           <DownloadSheet />
