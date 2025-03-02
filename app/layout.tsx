@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
+import Navbar from "@/components/navbar";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${plusJakartaSans.className} antialiased`}>
         <AuthProvider>
+          <Navbar />
           {children}
           <Toaster />
         </AuthProvider>

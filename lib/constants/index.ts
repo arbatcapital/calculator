@@ -167,8 +167,7 @@ export const WEBSITE_ABOUT_PAGE =
   process.env.ABOUT_PAGE_URL || "https://www.arbat-capital.io/about-us";
 export const WEBSITE_FAQ_PAGE =
   process.env.FAQ_PAGE_URL || "https://www.arbat-capital.io/faq";
-export const WEBSITE_APPLY_NOW =
-  process.env.APPLY_PAGE_URL || "app.arbat-capital.io";
+export const WEBSITE_APPLY_NOW = process.env.APPLY_PAGE_URL || "/";
 
 export const MAX_FILE_SIZE = 4 * 1024 * 1024;
 export const NAVLINKS = [
