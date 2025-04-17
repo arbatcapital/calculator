@@ -23,12 +23,13 @@ import {
   defaultBusinessInfoFormValues,
   FUNDING_AMOUNT,
   FUNDING_REASON,
+  INDUSTRY,
   MONTHS,
   YEARS,
 } from "@/lib/constants";
 import { TBusinessInfoForm } from "@/lib/types";
 import { businessInfoFormSchema } from "@/lib/validators";
-import { ArrowRight, DollarSign, Loader } from "lucide-react";
+import { ArrowRight, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -43,7 +44,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { formatEIN } from "@/lib/utils";
+import { formatEIN, formatPhoneNumber } from "@/lib/utils";
 
 const BusinessInfoForm = () => {
   const [isPending, startTransition] = useTransition();
@@ -143,6 +144,34 @@ const BusinessInfoForm = () => {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="industry"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="mb-3 sm:mb-2 inline-block">
+                    What industry are you in?
+                  </FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INDUSTRY.map((industry) => (
+                          <SelectItem key={industry} value={industry}>
+                            {industry}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="businessName"
@@ -169,7 +198,7 @@ const BusinessInfoForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What is your DBA
+                    What is your DBA, if applicable?
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="Enter DBA" {...field} maxLength={40} />
@@ -363,7 +392,7 @@ const BusinessInfoForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What&apos;s your annual revenue?
+                    What is your annual revenue?
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -384,7 +413,9 @@ const BusinessInfoForm = () => {
                         placeholder="Enter annual revenue"
                         maxLength={10}
                       />
-                      <DollarSign className="absolute top-[50%] -translate-y-[50%] right-2 text-muted-foreground h-5 w-5" />
+                      <div className="absolute top-[50%] -translate-y-[50%] right-2 text-muted-foreground">
+                        $USD
+                      </div>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -468,8 +499,10 @@ const BusinessInfoForm = () => {
                       type="text"
                       placeholder="Enter phone"
                       value={field.value}
-                      onChange={field.onChange}
-                      maxLength={10}
+                      onChange={(e) =>
+                        field.onChange(formatPhoneNumber(e.target.value))
+                      }
+                      maxLength={12}
                     />
                   </FormControl>
                   <FormMessage />

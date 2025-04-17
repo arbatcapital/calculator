@@ -110,6 +110,7 @@ export default async function AdminPage() {
     }
   }
   const hasAdminRole = roles.some((x) => x.key === "admin");
+  console.log(roles);
   if (!hasAdminRole) {
     redirect("/unauthorized");
   }

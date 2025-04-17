@@ -101,6 +101,21 @@ export function formatEIN(value: string) {
   return formattedValue;
 }
 
+export function formatPhoneNumber(value: string) {
+  const rawValue = value.replace(/\D/g, "");
+  let formattedValue = rawValue;
+  if (rawValue.length > 3) {
+    formattedValue = `${rawValue.slice(0, 3)}-${rawValue.slice(3)}`;
+  }
+  if (rawValue.length > 6) {
+    formattedValue = `${rawValue.slice(0, 3)}-${rawValue.slice(
+      3,
+      6
+    )}-${rawValue.slice(6)}`;
+  }
+  return formattedValue;
+}
+
 export function formatAddress(
   street: string,
   city: string,

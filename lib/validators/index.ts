@@ -3,10 +3,11 @@ import { z } from "zod";
 export const businessInfoFormSchema = z
   .object({
     businessType: z.string().min(2, "Please select an option"),
+    industry: z.string().min(2, "Please select an option"),
     businessName: z
       .string()
       .min(2, "Business name must be atleast 2 characters"),
-    dba: z.string().min(1, "DBA is required"),
+    dba: z.string().optional(),
     businessPropertyInfo: z
       .string()
       .min(1, "Business property information is required"),
@@ -76,7 +77,6 @@ export const personalInfoFormSchema = z
     education: z.string().min(2, "Please select an option"),
     homeOwnershipStatus: z.string().min(2, "Please select an option"),
     homeOwnershipStatusOther: z.string().optional(),
-    industry: z.string().min(2, "Please select an option"),
     employmentStatus: z.string().min(2, "Please select an option"),
     creditScore: z.string().min(2, "Please select an option"),
     ssn: z

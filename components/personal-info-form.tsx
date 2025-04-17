@@ -15,10 +15,9 @@ import {
   EDUCATION,
   EMPLOYMENT_STATUS,
   HOME_OWNERSHIP,
-  INDUSTRY,
 } from "@/lib/constants";
 import { TPersonalInfoForm } from "@/lib/types";
-import { cn, formatSSN } from "@/lib/utils";
+import { cn, formatPhoneNumber, formatSSN } from "@/lib/utils";
 import { personalInfoFormSchema } from "@/lib/validators";
 import {
   Field,
@@ -59,9 +58,11 @@ const PersonalInfoForm = () => {
   const homeOwnershipStatus = form.watch("homeOwnershipStatus");
 
   const onSubmit = async (formData: TPersonalInfoForm) => {
+    console.log("submit", formData);
     startTransition(async () => {
       try {
         const res = await savePersonalInfo(formData, userId!);
+        console.log(res);
         if (!res.success) {
           toast({
             variant: "destructive",
@@ -163,7 +164,7 @@ const PersonalInfoForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    Your date of birth?
+                    What is your date of birth?
                   </FormLabel>
                   <FormControl>
                     <div>
@@ -181,14 +182,17 @@ const PersonalInfoForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What is the best phone to reach you?
+                    What is the best number to reach you?
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="text"
                       placeholder="Enter your phone"
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(e) =>
+                        field.onChange(formatPhoneNumber(e.target.value))
+                      }
+                      maxLength={12}
                     />
                   </FormControl>
                   <FormMessage />
@@ -294,32 +298,7 @@ const PersonalInfoForm = () => {
                 )}
               />
             )}
-            <FormField
-              control={form.control}
-              name="industry"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    What industry are you in?
-                  </FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Industry" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {INDUSTRY.map((industry) => (
-                          <SelectItem key={industry} value={industry}>
-                            {industry}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <FormField
               control={form.control}
               name="employmentStatus"

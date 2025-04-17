@@ -27,6 +27,7 @@ export const saveBusinessInfo = async (data: unknown, userId: string) => {
           application: {
             update: {
               businessType: validatedData.businessType,
+              industry: validatedData.industry,
               businessName: validatedData.businessName,
               dba: validatedData.dba,
               fundingAmount: validatedData.fundingAmount,
@@ -72,6 +73,7 @@ export const saveBusinessInfo = async (data: unknown, userId: string) => {
           application: {
             create: {
               businessType: validatedData.businessType,
+              industry: validatedData.industry,
               businessName: validatedData.businessName,
               dba: validatedData.dba,
               fundingAmount: validatedData.fundingAmount,
@@ -145,7 +147,7 @@ export const savePersonalInfo = async (data: unknown, userId: string) => {
             education: validatedData.education,
             homeOwnershipStatus: validatedData.homeOwnershipStatus,
             homeOwnershipStatusOther: validatedData.homeOwnershipStatusOther,
-            industry: validatedData.industry,
+
             employmentStatus: validatedData.employmentStatus,
             creditScore: validatedData.creditScore,
             ssn: validatedData.ssn,
@@ -225,6 +227,7 @@ export const getBusinessInfo = async (userId: string) => {
         application: {
           select: {
             businessType: true,
+            industry: true,
             businessName: true,
             dba: true,
             businessPropertyInfo: true,
@@ -273,7 +276,6 @@ export const getPersonalInfo = async (userId: string) => {
             education: true,
             homeOwnershipStatus: true,
             homeOwnershipStatusOther: true,
-            industry: true,
             employmentStatus: true,
             creditScore: true,
             ssn: true,

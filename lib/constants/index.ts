@@ -1,15 +1,9 @@
 export const BUSINESS_TYPE = [
   "LLC",
-  "Sole Proprietorship",
   "Partnership",
   "C Corporation",
   "S Corporation",
-  "Wholesale",
-  "Business Services",
-  "Consumer Services",
-  "Restaurant Bar",
-  "Administrative",
-  "IT",
+  "Sole Proprietorship ",
 ] as const;
 
 export const FUNDING_AMOUNT = [
@@ -38,23 +32,19 @@ export const FUNDING_REASON = [
   "Refinance Debt",
   "Working Capital",
   "Rent",
+  "Other Purpose",
 ] as const;
 
 export const INDUSTRY = [
-  "Administrative",
-  "Agriculture",
-  "Arts",
-  "Education",
-  "Health care",
-  "Information",
-  "Management",
-  "Manufacturing",
-  "Mining",
-  "Scientific",
-  "Real Estate",
-  "Retail",
+  "Retail Store",
+  "Wholesale",
+  "Business Services",
+  "Consumer Services",
+  "Bar or Nightclub",
+  "Construction",
   "Transportation",
-  "Other",
+  "Car Wash",
+  "Other Industry",
 ] as const;
 
 export const HOME_OWNERSHIP = [
@@ -65,17 +55,16 @@ export const HOME_OWNERSHIP = [
 ] as const;
 
 export const CREDIT_SCORE = [
-  "Excellent +720",
-  "Good 680 - 719",
-  "Fair 640 - 679",
-  "Poor 639 or less",
+  "Excellent (720 or more)",
+  "Good (680-719)",
+  "Fair (640-679)",
+  "Poor (639 or less)",
 ] as const;
 
 export const EMPLOYMENT_STATUS = [
   "Employed",
-  "Employed full time",
-  "Military",
-  "Employed part time",
+  "Self-employed",
+  "Other",
 ] as const;
 
 export const EDUCATION = [
@@ -85,6 +74,7 @@ export const EDUCATION = [
   "Bachelor Degree",
   "Master Degree",
   "PhD",
+  "Other",
 ] as const;
 
 export const BUSINESS_STATE = [

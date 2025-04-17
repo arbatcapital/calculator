@@ -183,7 +183,7 @@ const DocumentUploadForm = () => {
                   <FormControl>
                     <Input
                       type="text"
-                      placeholder="Entity sign"
+                      placeholder="TYPE IN YOUR FULL NAME"
                       value={field.value}
                       onChange={field.onChange}
                     />
@@ -218,15 +218,16 @@ const DocumentUploadForm = () => {
               </Button>
             </div>
 
-            <p className="text-sm leading-6 text-muted-foreground">
-              You understand that by signing below you are providing
-              &quot;written instructions&quot; to Lexington Financial
-              Consultants, LLC DBA Lexio Capital under the Fair Credit Reporting
-              Act, authorizing Arbat Capital LLC to obtain information from your
-              personal credit profile or other information from Experian,
-              Transunion and/or Equifax. You authorize Arbat Capital LLC to
-              obtain such information solely to conduct a per-qualification for
-              credit and/or cash advance obtention purposes.
+            <p className="text-sm leading-6 text-muted-foreground text-justify">
+              You understand that by clicking “Confirm” above, you are providing
+              &quot;written instructions&quot; to Arbat Capital LLC DBA Arbat
+              Capital under the Fair Credit Reporting Act, authorizing Arbat
+              Capital to obtain information from your personal credit profile,
+              company profile and/or any other information from Experian,
+              Transunion and/or Equifax. You hereby authorize Arbat Capital LLC
+              to obtain such information in order to conduct prequalification
+              and make all necessary verifications for credit and/or cash
+              advance obtention purposes.
             </p>
           </form>
         </Form>
