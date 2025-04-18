@@ -452,7 +452,7 @@ const BusinessInfoForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="mb-3 sm:mb-2 inline-block">
-                    Business website
+                    Business website (if applicable)
                   </FormLabel>
                   <FormControl>
                     <Input

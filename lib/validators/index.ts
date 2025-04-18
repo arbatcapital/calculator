@@ -12,7 +12,7 @@ export const businessInfoFormSchema = z
       .string()
       .min(1, "Business property information is required"),
     businessPropertyInfoOther: z.string().optional(),
-    businessWebsite: z.string().url("Please provide a valid website url"),
+    businessWebsite: z.string().optional(),
 
     businessEmailAddress: z
       .string()
