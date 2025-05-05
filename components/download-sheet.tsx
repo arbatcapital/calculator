@@ -32,9 +32,21 @@ export default function DownloadSheet() {
     setLoading(false);
   };
 
+  const downloadExcel = () => {
+    const link = document.createElement("a");
+    link.href = "/api/download/excel";
+    link.download = "applications.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <Button type="button" onClick={handleDownload} disabled={loading}>
-      {loading ? "Downloading..." : "Download Applications"}
-    </Button>
+    <>
+      <button onClick={downloadExcel}>download2</button>
+      <Button type="button" onClick={handleDownload} disabled={loading}>
+        {loading ? "Downloading..." : "Download Applications"}
+      </Button>
+    </>
   );
 }

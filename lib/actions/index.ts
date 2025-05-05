@@ -456,18 +456,23 @@ export async function exportToExcel() {
     );
     await workbook.xlsx.writeFile(filePath);
     const fileUrl = `/applications/${fileName}`;
-    return {
-      success: true,
-      message: "File downloaded successfully",
-      fileUrl: fileUrl,
-    };
+    // return {
+    //   success: true,
+    //   message: "File downloaded successfully",
+    //   fileUrl: fileUrl,
+    // };
+
+    //option 2
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer;
   } catch (error) {
     console.log(error);
-    return {
-      success: false,
-      message: "Failed to download",
-      fileUrl: null,
-    };
+    // return {
+    //   success: false,
+    //   message: "Failed to download",
+    //   fileUrl: null,
+    // };
+    return null;
   }
 }
 export async function deleteFile(fileName: string) {
