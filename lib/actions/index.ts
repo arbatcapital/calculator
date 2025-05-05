@@ -486,7 +486,7 @@ export async function exportToExcelBuffer() {
       },
     });
 
-    if (applications.length === 1) {
+    if (applications.length === 0) {
       return {
         success: false,
         message: "No applications to download",
