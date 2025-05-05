@@ -1,10 +1,13 @@
-import { exportToExcel } from "@/lib/actions";
+import { exportToExcelBuffer } from "@/lib/actions";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const buffer = await exportToExcel();
+    const { success, message, buffer } = await exportToExcelBuffer();
 
+    if (!success || !buffer) {
+      return NextResponse.json({ success, message }, { status: 400 });
+    }
     return new NextResponse(buffer, {
       headers: {
         "Content-Type":

@@ -1,9 +1,8 @@
 "use client";
 
-import { deleteFile, exportToExcel } from "@/lib/actions";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { useToast } from "@/hooks/use-toast";
 
 export default function DownloadSheet() {
   const [loading, setLoading] = useState(false);
@@ -12,38 +11,39 @@ export default function DownloadSheet() {
   const handleDownload = async () => {
     setLoading(true);
     try {
-      const res = await exportToExcel();
+      const res = await fetch("/api/download/excel");
 
-      if (!res.success) {
+      const contentType = res.headers.get("Content-Type");
+
+      if (contentType?.includes("application/json")) {
+        const data = await res.json();
         toast({
-          title: res.message,
+          title: data.message,
           variant: "destructive",
         });
+        setLoading(false);
+        return;
       }
 
-      if (res.fileUrl) {
-        window.location.href = res.fileUrl;
-        //delete the file
-        await deleteFile(res.fileUrl);
-      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = new Date().getTime() + "_applications.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      document.body.removeChild(a);
     } catch (error) {
       console.log("Failed to download the file.", error);
     }
     setLoading(false);
   };
 
-  const downloadExcel = () => {
-    const link = document.createElement("a");
-    link.href = "/api/download/excel";
-    link.download = "applications.xlsx";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <>
-      <button onClick={downloadExcel}>download2</button>
       <Button type="button" onClick={handleDownload} disabled={loading}>
         {loading ? "Downloading..." : "Download Applications"}
       </Button>
