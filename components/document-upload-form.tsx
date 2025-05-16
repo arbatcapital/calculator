@@ -185,7 +185,9 @@ const DocumentUploadForm = () => {
                       type="text"
                       placeholder="TYPE IN YOUR FULL NAME"
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(e) => {
+                        field.onChange(e.target.value.toUpperCase());
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

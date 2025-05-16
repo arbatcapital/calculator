@@ -152,6 +152,7 @@ export const DataTableSchema = z.object({
   ssn: z.string().nullable(),
   signor: z.string().nullable(),
   docs: z.object({
+    docId: z.string().nullable(),
     annualReport: z.string().nullable(),
     articleOfIncorporation: z.string().nullable(),
     businessAddressProof: z.string().nullable(),

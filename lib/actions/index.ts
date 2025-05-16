@@ -2,7 +2,6 @@
 import ExcelJS from "exceljs";
 import path from "path";
 import { prisma } from "@/db";
-import fs from "fs";
 import {
   businessInfoFormSchema,
   personalInfoFormSchema,
@@ -486,7 +485,7 @@ export async function exportToExcelBuffer() {
       },
     });
 
-    if (applications.length === 0) {
+    if (applications?.length === 0) {
       return {
         success: false,
         message: "No applications to download",
@@ -615,26 +614,164 @@ export async function exportToExcelBuffer() {
     };
   }
 }
-export async function deleteFile(fileName: string) {
+
+export async function exportToExcelBufferSingleItem(docId: string) {
   try {
-    if (!fileName) {
-      throw new Error("No file specified");
+    const application = await prisma.application.findFirst({
+      where: { id: docId },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!application) {
+      return {
+        success: false,
+        message: "Application not found",
+        buffer: null,
+      };
     }
 
-    const filePath = path.join(
-      process.cwd(),
-      "public",
-      "applications",
-      fileName
-    );
+    const columns = [
+      { header: "Business Type", key: "businessType", width: 20 },
+      { header: "Business Name", key: "businessName", width: 25 },
+      { header: "DBA", key: "dba", width: 25 },
+      {
+        header: "Business Property Info",
+        key: "businessPropertyInfo",
+        width: 30,
+      },
+      {
+        header: "Other Property Info (If any)",
+        key: "businessPropertyInfoOther",
+        width: 30,
+      },
+      { header: "Funding Amount", key: "fundingAmount", width: 15 },
+      { header: "Business Website", key: "businessWebsite", width: 30 },
+      { header: "Business Email", key: "businessEmailAddress", width: 30 },
+      { header: "Business Phone", key: "businessPhone", width: 20 },
+      { header: "Funding Reason", key: "fundingReason", width: 30 },
+      { header: "Business Start Month", key: "businessStartMonth", width: 15 },
+      { header: "Business Start Year", key: "businessStartYear", width: 15 },
+      { header: "Business Start Date", key: "businessStartDate", width: 20 },
+      { header: "Annual Revenue ($USD)", key: "annualRevenue", width: 15 },
+      { header: "EIN", key: "ein", width: 15 },
+      { header: "Business Address", key: "completeBusinessAddress", width: 40 },
+      { header: "First Name", key: "firstName", width: 20 },
+      { header: "Last Name", key: "lastName", width: 20 },
+      { header: "Birthday", key: "birthday", width: 15 },
+      { header: "Phone Number", key: "phoneNumber", width: 20 },
+      { header: "Email", key: "email", width: 30 },
+      { header: "Education", key: "education", width: 20 },
+      {
+        header: "Home Ownership Status",
+        key: "homeOwnershipStatus",
+        width: 25,
+      },
+      {
+        header: "Home Ownership Other (if any)",
+        key: "homeOwnershipStatusOther",
+        width: 25,
+      },
+      { header: "Industry", key: "industry", width: 20 },
+      { header: "Employment Status", key: "employmentStatus", width: 25 },
+      { header: "Credit Score", key: "creditScore", width: 15 },
+      { header: "Home Address", key: "completeHomeAddress", width: 40 },
+      { header: "SSN", key: "ssn", width: 20 },
+      { header: "Signor", key: "signor", width: 20 },
+      { header: "Entity Name", key: "entityName", width: 30 },
+      { header: "Submission Date", key: "dateofSubmission", width: 20 },
 
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      return { success: true };
-    }
-    return { success: false, message: "File not found" };
+      // Document Links (Hyperlinks)
+      { header: "Gov ID Document", key: "govIdDoc", width: 30 },
+      { header: "Annual Report", key: "annualReport", width: 30 },
+      {
+        header: "Articles of Incorporation",
+        key: "articleOfIncorporation",
+        width: 30,
+      },
+      {
+        header: "Business Address Proof",
+        key: "businessAddressProof",
+        width: 30,
+      },
+      { header: "Bank Statement 1", key: "bankStatment1", width: 30 },
+      { header: "Bank Statement 2", key: "bankStatment2", width: 30 },
+      { header: "Bank Statement 3", key: "bankStatment3", width: 30 },
+    ];
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Applications");
+
+    worksheet.columns = columns;
+
+    const row = worksheet.addRow(application);
+
+    const linkFields = [
+      "govIdDoc",
+      "annualReport",
+      "articleOfIncorporation",
+      "businessAddressProof",
+      "bankStatment1",
+      "bankStatment2",
+      "bankStatment3",
+    ] as const;
+
+    linkFields.forEach((field) => {
+      if (application[field]) {
+        const cell = row.getCell(
+          columns.findIndex((col) => col.key === field) + 1
+        );
+        cell.value = { text: "View Document", hyperlink: application[field] };
+        cell.font = { color: { argb: "0000FF" }, underline: true };
+      }
+    });
+
+    worksheet.columns.forEach((column) => {
+      let maxLength = column.width || 10;
+      column.eachCell?.((cell) => {
+        const cellValue = cell.value ? cell.value.toString() : "";
+        maxLength = Math.max(maxLength, cellValue.length);
+      });
+      column.width = maxLength + 2;
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return {
+      success: true,
+      message: "File downloaded successfully",
+      buffer: buffer,
+    };
   } catch (error) {
-    console.error("Error deleting file:", error);
-    return { success: false, message: "Internal server error" };
+    console.log(error);
+    return {
+      success: false,
+      message: "Failed to download",
+      buffer: null,
+    };
   }
 }
+
+// export async function deleteFile(fileName: string) {
+//   try {
+//     if (!fileName) {
+//       throw new Error("No file specified");
+//     }
+
+//     const filePath = path.join(
+//       process.cwd(),
+//       "public",
+//       "applications",
+//       fileName
+//     );
+
+//     if (fs.existsSync(filePath)) {
+//       fs.unlinkSync(filePath);
+//       return { success: true };
+//     }
+//     return { success: false, message: "File not found" };
+//   } catch (error) {
+//     console.error("Error deleting file:", error);
+//     return { success: false, message: "Internal server error" };
+//   }
+// }

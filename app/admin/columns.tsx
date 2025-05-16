@@ -1,4 +1,5 @@
 "use client";
+import DownloadSingleItem from "@/components/download-single-item";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
       const bankStatment1 = row.original.docs.bankStatment1;
       const bankStatment2 = row.original.docs.bankStatment2;
       const bankStatment3 = row.original.docs.bankStatment3;
+      const docId = row.original.docs.docId;
 
       return (
         <DropdownMenu>
@@ -137,6 +139,9 @@ export const columns: ColumnDef<TDataTableSchema>[] = [
             ) : (
               ""
             )}
+            <DropdownMenuItem>
+              <DownloadSingleItem docId={docId} />
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

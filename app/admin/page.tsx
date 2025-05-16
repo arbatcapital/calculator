@@ -79,6 +79,8 @@ async function getData(): Promise<TDataTableSchema[]> {
       employmentStatus: res.employmentStatus,
       creditScore: res.creditScore,
       docs: {
+        docId: res.id,
+        // added docId
         annualReport: res.annualReport,
         articleOfIncorporation: res.articleOfIncorporation,
         businessAddressProof: res.businessAddressProof,
